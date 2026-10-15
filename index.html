@@ -1,0 +1,973 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Ritmo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1C2B2D;
+    --sage:#6E9C81;
+    --sage-light:#DCE9E0;
+    --sand:#F1EAD9;
+    --coral:#E4795A;
+    --coral-light:#FBE3DA;
+    --gold:#C9A15A;
+    --gold-light:#F3E9D3;
+    --paper:#FBF8F3;
+    --text:#2E3532;
+    --muted:#8A928E;
+    --line:#E4DFD2;
+    --white:#FFFFFF;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  body{margin:0;background:var(--paper);color:var(--text);font-family:'Inter',sans-serif;padding-bottom:84px;}
+  h1,h2,h3{font-family:'Fraunces',serif;margin:0;color:var(--ink);}
+  .app-header{padding:22px 20px 16px;background:var(--paper);position:sticky;top:0;z-index:10;border-bottom:1px solid var(--line);}
+  .app-header .brand{display:flex;align-items:baseline;justify-content:space-between;}
+  .app-header h1{font-size:26px;font-weight:600;letter-spacing:-0.01em;}
+  .app-header .tagline{font-size:12px;color:var(--muted);margin-top:2px;}
+  .date-nav{display:flex;align-items:center;justify-content:space-between;margin-top:14px;}
+  .date-nav button{background:none;border:none;font-size:18px;color:var(--sage);padding:6px 10px;cursor:pointer;}
+  .date-nav .date-label{font-size:14px;font-weight:600;color:var(--ink);text-transform:capitalize;}
+  .date-nav .date-label small{display:block;font-size:11px;color:var(--muted);font-weight:400;text-transform:none;}
+
+  .ritual-strip{display:flex;gap:6px;padding:14px 20px 4px;overflow-x:auto;}
+  .ritual-dot{flex:1;min-width:34px;height:38px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:15px;background:var(--white);border:1.5px solid var(--line);transition:all .2s;}
+  .ritual-dot.done{background:var(--sage);border-color:var(--sage);}
+
+  main{padding:8px 20px 20px;}
+  .section-title{font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:22px 0 10px;font-weight:600;}
+  .section-title:first-child{margin-top:6px;}
+
+  .card{background:var(--white);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:12px;}
+  .card-row{display:flex;align-items:center;justify-content:space-between;}
+  .card h3{font-size:15px;font-weight:600;}
+  .muted{color:var(--muted);font-size:12.5px;}
+
+  /* Water */
+  .water-card .water-visual{display:flex;align-items:center;gap:14px;margin-top:10px;}
+  .water-ring{width:64px;height:64px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:conic-gradient(var(--sage) calc(var(--pct)*1%), var(--sage-light) 0);}
+  .water-ring-inner{width:50px;height:50px;border-radius:50%;background:var(--white);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--ink);}
+  .water-btns{display:flex;gap:8px;flex-wrap:wrap;}
+  .pill-btn{border:1.5px solid var(--sage);background:var(--sage-light);color:var(--ink);border-radius:20px;padding:7px 14px;font-size:13px;font-weight:600;cursor:pointer;}
+  .pill-btn.ghost{background:none;border-color:var(--line);color:var(--muted);}
+
+  /* forms */
+  label{display:block;font-size:12px;color:var(--muted);margin:10px 0 4px;font-weight:600;}
+  input,select,textarea{width:100%;padding:10px 12px;border:1.5px solid var(--line);border-radius:10px;font-family:'Inter',sans-serif;font-size:14px;background:var(--paper);color:var(--text);}
+  textarea{resize:vertical;min-height:44px;}
+  .row2{display:flex;gap:10px;}
+  .row2 > div{flex:1;}
+  .row3{display:flex;gap:8px;}
+  .row3 > div{flex:1;}
+  .btn{width:100%;margin-top:14px;padding:12px;border:none;border-radius:12px;background:var(--ink);color:var(--white);font-size:14px;font-weight:600;cursor:pointer;}
+  .btn.secondary{background:var(--coral);}
+  .btn.subtle{background:var(--sage-light);color:var(--ink);}
+  .btn.gold{background:var(--gold);}
+
+  .list-item{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--line);}
+  .list-item:last-child{border-bottom:none;}
+  .list-item .li-main{font-size:13.5px;font-weight:600;}
+  .list-item .li-sub{font-size:11.5px;color:var(--muted);}
+  .li-value{font-size:14px;font-weight:700;color:var(--ink);}
+  .li-value.expense{color:var(--coral);}
+  .del-btn{background:none;border:none;color:var(--muted);font-size:16px;cursor:pointer;padding:4px 8px;}
+
+  .chip{display:inline-block;padding:4px 10px;border-radius:20px;background:var(--sand);font-size:11px;font-weight:600;color:var(--ink);}
+  .chip.streak{background:var(--gold-light);color:#8a6c2b;}
+
+  .empty{text-align:center;padding:30px 10px;color:var(--muted);font-size:13px;}
+
+  .bar-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+  .bar-label{width:88px;font-size:12px;color:var(--text);flex-shrink:0;}
+  .bar-track{flex:1;height:10px;background:var(--sand);border-radius:6px;overflow:hidden;}
+  .bar-fill{height:100%;background:var(--coral);border-radius:6px;}
+  .bar-fill.sage{background:var(--sage);}
+  .bar-value{width:64px;text-align:right;font-size:12px;font-weight:700;color:var(--ink);flex-shrink:0;}
+
+  .meds-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:10px;}
+  .med-day{aspect-ratio:1;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:11px;background:var(--sand);color:var(--muted);border:1px solid var(--line);cursor:pointer;}
+  .med-day.taken{background:var(--sage);color:var(--white);border-color:var(--sage);font-weight:700;}
+  .med-day.future{opacity:.35;pointer-events:none;}
+
+  .workout-ex{display:flex;gap:8px;margin-bottom:8px;align-items:center;}
+  .workout-ex input{flex:1;}
+  .workout-ex button{background:none;border:none;color:var(--coral);font-size:18px;cursor:pointer;}
+
+  .goal-card .goal-head{display:flex;justify-content:space-between;align-items:center;}
+  .goal-card .goal-icon{font-size:20px;}
+  .goal-card label{margin-top:12px;}
+  .week-dots{display:flex;gap:5px;margin-top:8px;}
+  .week-dots span{flex:1;height:6px;border-radius:4px;background:var(--sand);}
+  .week-dots span.hit{background:var(--sage);}
+
+  .subnav{display:flex;gap:6px;margin-bottom:16px;overflow-x:auto;padding-bottom:2px;}
+  .subnav button{flex-shrink:0;border:1.5px solid var(--line);background:var(--white);color:var(--muted);border-radius:20px;padding:7px 14px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;}
+  .subnav button.active{background:var(--ink);border-color:var(--ink);color:var(--white);}
+  .subpanel{display:none;}
+  .subpanel.active{display:block;}
+
+  nav.tabbar{position:fixed;bottom:0;left:0;right:0;background:var(--white);border-top:1px solid var(--line);display:flex;padding:6px 4px calc(6px + env(safe-area-inset-bottom));z-index:20;}
+  nav.tabbar button{flex:1;background:none;border:none;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 2px;color:var(--muted);font-family:'Inter',sans-serif;font-size:10.5px;font-weight:600;cursor:pointer;border-radius:10px;}
+  nav.tabbar button .ic{font-size:19px;}
+  nav.tabbar button.active{color:var(--sage);background:var(--sage-light);}
+
+  .tab-panel{display:none;}
+  .tab-panel.active{display:block;}
+
+  .toast{position:fixed;bottom:96px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--white);padding:9px 18px;border-radius:20px;font-size:12.5px;font-weight:600;opacity:0;pointer-events:none;transition:opacity .25s;z-index:30;}
+  .toast.show{opacity:1;}
+
+  #printArea{display:none;}
+  .rep-block{margin-bottom:18px;}
+  .rep-block h4{font-family:'Fraunces',serif;font-size:15px;margin-bottom:6px;color:var(--ink);}
+  .rep-row{display:flex;justify-content:space-between;font-size:13px;padding:3px 0;border-bottom:1px dashed var(--line);}
+
+  @media print{
+    body > *:not(#printArea){ display:none !important; }
+    #printArea{ display:block !important; padding:10px; }
+    .card, nav.tabbar, .app-header, .ritual-strip{ display:none !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app-header">
+  <div class="brand">
+    <h1>Ritmo</h1>
+  </div>
+  <div class="tagline">seu dia, registrado</div>
+  <div class="date-nav">
+    <button onclick="shiftDay(-1)">‹</button>
+    <div class="date-label" id="dateLabel">—</div>
+    <button onclick="shiftDay(1)">›</button>
+  </div>
+</div>
+
+<div class="ritual-strip" id="ritualStrip"></div>
+
+<main>
+
+  <!-- HOJE -->
+  <div class="tab-panel active" id="tab-hoje">
+    <div class="section-title" id="sec-water">Água</div>
+    <div class="card water-card">
+      <div class="card-row">
+        <h3 id="waterLabel">0 / 2000 ml</h3>
+        <span class="muted" id="waterPct">0%</span>
+      </div>
+      <div class="water-visual">
+        <div class="water-ring" id="waterRing" style="--pct:0"><div class="water-ring-inner" id="waterRingText">0%</div></div>
+        <div class="water-btns">
+          <button class="pill-btn" onclick="addWater(250)">+250ml</button>
+          <button class="pill-btn" onclick="addWater(500)">+500ml</button>
+          <button class="pill-btn ghost" onclick="addWater(-250)">-250ml</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-title" id="sec-sleep">Sono</div>
+    <div class="card">
+      <label>Horas dormidas</label>
+      <input type="number" id="sleepInput" step="0.5" min="0" max="16" placeholder="Ex: 7.5" oninput="saveSleep(this.value)">
+    </div>
+
+    <div class="section-title" id="sec-meals">Refeições</div>
+    <div class="card">
+      <div id="mealsList"></div>
+      <div class="row2">
+        <div><label>Horário</label><input type="time" id="mealTime"></div>
+        <div style="flex:2"><label>O que comeu</label><input type="text" id="mealDesc" placeholder="Ex: arroz, frango, salada"></div>
+      </div>
+      <button class="btn subtle" onclick="addMeal()">Adicionar refeição</button>
+    </div>
+
+    <div class="section-title" id="sec-workout">Treino do dia</div>
+    <div class="card">
+      <label>Tipo de treino</label>
+      <input type="text" id="workoutType" placeholder="Ex: Musculação - perna, Natação, Descanso" oninput="saveWorkoutType(this.value)">
+      <label>Exercícios / detalhes</label>
+      <div id="exerciseList"></div>
+      <div class="workout-ex">
+        <input type="text" id="exerciseInput" placeholder="Ex: Agachamento 4x12, ou Nadei 40 min">
+        <button onclick="addExercise()">＋</button>
+      </div>
+    </div>
+
+    <div class="section-title" id="sec-devotional">Devocional</div>
+    <div class="card">
+      <label>Versículo do dia</label>
+      <input type="text" id="devVerse" placeholder="Ex: Salmos 23:1" oninput="saveDevotional()">
+      <label>Leitura / anotação</label>
+      <textarea id="devReading" placeholder="O que você leu ou refletiu..." oninput="saveDevotional()"></textarea>
+    </div>
+
+    <div class="section-title" id="sec-medication">Remédio de hoje</div>
+    <div class="card card-row" style="cursor:pointer" onclick="toggleMedToday()">
+      <div>
+        <h3 id="medTodayLabel">Ainda não tomei</h3>
+        <div class="muted">Toque para marcar</div>
+      </div>
+      <div id="medTodayIcon" style="font-size:26px;">◯</div>
+    </div>
+  </div>
+
+  <!-- METAS -->
+  <div class="tab-panel" id="tab-metas">
+    <div class="section-title">Suas metas</div>
+
+    <div class="card goal-card">
+      <div class="goal-head"><h3><span class="goal-icon">💧</span> Água</h3><span class="chip streak" id="streakWater">🔥 0 dias</span></div>
+      <label>Meta diária (ml)</label>
+      <input type="number" id="goalWater" step="250" oninput="saveGoals()">
+      <div class="muted" id="progWater" style="margin-top:8px;"></div>
+      <div class="week-dots" id="weekWater"></div>
+    </div>
+
+    <div class="card goal-card">
+      <div class="goal-head"><h3><span class="goal-icon">🌙</span> Sono</h3><span class="chip streak" id="streakSleep">🔥 0 dias</span></div>
+      <label>Meta diária (horas)</label>
+      <input type="number" id="goalSleep" step="0.5" oninput="saveGoals()">
+      <div class="muted" id="progSleep" style="margin-top:8px;"></div>
+      <div class="week-dots" id="weekSleep"></div>
+    </div>
+
+    <div class="card goal-card">
+      <div class="goal-head"><h3><span class="goal-icon">📚</span> Estudo</h3><span class="chip streak" id="streakStudy">🔥 0 dias</span></div>
+      <label>Meta semanal (dias)</label>
+      <input type="number" id="goalStudy" step="1" min="1" max="7" oninput="saveGoals()">
+      <div class="muted" id="progStudy" style="margin-top:8px;"></div>
+      <div class="week-dots" id="weekStudy"></div>
+    </div>
+
+    <div class="card goal-card">
+      <div class="goal-head"><h3><span class="goal-icon">🏋</span> Treino</h3><span class="chip streak" id="streakWorkout">🔥 0 dias</span></div>
+      <label>Meta semanal (dias)</label>
+      <input type="number" id="goalWorkout" step="1" min="1" max="7" oninput="saveGoals()">
+      <div class="muted" id="progWorkout" style="margin-top:8px;"></div>
+      <div class="week-dots" id="weekWorkout"></div>
+    </div>
+  </div>
+
+  <!-- GASTOS -->
+  <div class="tab-panel" id="tab-gastos">
+    <div class="section-title">Novo gasto</div>
+    <div class="card">
+      <label>Valor (R$)</label>
+      <input type="number" id="expValue" step="0.01" placeholder="0,00">
+      <label>Categoria</label>
+      <select id="expCategory">
+        <option>Alimentação</option>
+        <option>Transporte</option>
+        <option>Saúde</option>
+        <option>Lazer</option>
+        <option>Casa</option>
+        <option>Educação</option>
+        <option>Outros</option>
+      </select>
+      <label>Descrição</label>
+      <input type="text" id="expDesc" placeholder="Ex: mercado, uber, farmácia">
+      <button class="btn secondary" onclick="addExpense()">Registrar gasto</button>
+    </div>
+
+    <div class="section-title">Gastos do dia</div>
+    <div class="card" id="expDayCard"><div class="empty">Nenhum gasto hoje</div></div>
+
+    <div class="section-title">Relatório do mês</div>
+    <div class="card">
+      <div class="card-row" style="margin-bottom:6px;">
+        <h3 id="monthTotalLabel">R$ 0,00</h3>
+        <span class="muted" id="monthLabel"></span>
+      </div>
+      <div id="monthByCategory"></div>
+    </div>
+  </div>
+
+  <!-- CORPO -->
+  <div class="tab-panel" id="tab-corpo">
+    <div class="section-title">Registro do dia</div>
+    <div class="card">
+      <label>Peso (kg)</label>
+      <input type="number" id="bodyWeight" step="0.1" oninput="saveBody()">
+      <div class="row3">
+        <div><label>Cintura (cm)</label><input type="number" id="bodyWaist" step="0.5" oninput="saveBody()"></div>
+        <div><label>Quadril (cm)</label><input type="number" id="bodyHip" step="0.5" oninput="saveBody()"></div>
+      </div>
+      <div class="row3">
+        <div><label>Braço (cm)</label><input type="number" id="bodyArm" step="0.5" oninput="saveBody()"></div>
+        <div><label>Coxa (cm)</label><input type="number" id="bodyThigh" step="0.5" oninput="saveBody()"></div>
+      </div>
+    </div>
+
+    <div class="section-title">Evolução do peso</div>
+    <div class="card">
+      <div class="card-row" style="margin-bottom:8px;">
+        <span class="muted" id="bodyDelta">Sem dados suficientes</span>
+      </div>
+      <div id="bodyHistory"></div>
+    </div>
+  </div>
+
+  <!-- MAIS -->
+  <div class="tab-panel" id="tab-mais">
+    <div class="subnav">
+      <button class="active" data-sub="estudos" onclick="switchSub('estudos')">Estudos</button>
+      <button data-sub="remedio" onclick="switchSub('remedio')">Remédio</button>
+      <button data-sub="agenda" onclick="switchSub('agenda')">Agenda</button>
+      <button data-sub="exportar" onclick="switchSub('exportar')">Exportar</button>
+    </div>
+
+    <div class="subpanel active" id="sub-estudos">
+      <div class="section-title" id="sec-estudos">O que estudei hoje</div>
+      <div class="card">
+        <textarea id="studyDone" placeholder="O que você estudou hoje..." oninput="saveStudy()"></textarea>
+      </div>
+      <div class="section-title">Pendente para amanhã</div>
+      <div class="card">
+        <textarea id="studyPending" placeholder="O que ficou pendente..." oninput="saveStudy()"></textarea>
+      </div>
+      <div class="section-title">Histórico recente</div>
+      <div class="card" id="studyHistory"><div class="empty">Sem registros ainda</div></div>
+    </div>
+
+    <div class="subpanel" id="sub-remedio">
+      <div class="section-title">Adesão do mês</div>
+      <div class="card">
+        <div class="card-row">
+          <h3 id="medMonthLabel"></h3>
+          <span class="chip" id="medAdherence">0%</span>
+        </div>
+        <div class="meds-grid" id="medsGrid"></div>
+      </div>
+    </div>
+
+    <div class="subpanel" id="sub-agenda">
+      <div class="section-title">Nova consulta / lembrete</div>
+      <div class="card">
+        <label>Título</label>
+        <input type="text" id="apptTitle" placeholder="Ex: Retorno cardiologista, renovar receita">
+        <div class="row2">
+          <div><label>Data</label><input type="date" id="apptDate"></div>
+          <div><label>Hora</label><input type="time" id="apptTime"></div>
+        </div>
+        <label>Observações</label>
+        <input type="text" id="apptNotes" placeholder="Opcional">
+        <button class="btn" onclick="addAppt()">Salvar lembrete</button>
+      </div>
+      <div class="section-title">Próximos</div>
+      <div class="card" id="apptUpcoming"><div class="empty">Nenhum lembrete futuro</div></div>
+      <div class="section-title">Passados</div>
+      <div class="card" id="apptPast"><div class="empty">Nenhum lembrete passado</div></div>
+    </div>
+
+    <div class="subpanel" id="sub-exportar">
+      <div class="section-title">Exportar relatório</div>
+      <div class="card">
+        <div class="muted" style="margin-bottom:12px;">Gera um resumo pronto para imprimir ou salvar como PDF (usando a opção de impressão do navegador).</div>
+        <button class="btn" onclick="exportReport('week')">Relatório semanal</button>
+        <button class="btn gold" onclick="exportReport('month')">Relatório mensal</button>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<div id="printArea"></div>
+
+<div class="toast" id="toast"></div>
+
+<nav class="tabbar">
+  <button class="active" data-tab="hoje" onclick="switchTab('hoje')"><span class="ic">☀</span>Hoje</button>
+  <button data-tab="metas" onclick="switchTab('metas')"><span class="ic">◎</span>Metas</button>
+  <button data-tab="gastos" onclick="switchTab('gastos')"><span class="ic">◈</span>Gastos</button>
+  <button data-tab="corpo" onclick="switchTab('corpo')"><span class="ic">⚖</span>Corpo</button>
+  <button data-tab="mais" onclick="switchTab('mais')"><span class="ic">⋯</span>Mais</button>
+</nav>
+
+<script>
+let state = { expenses: [], appointments: [], dayLogs: {}, goals: {} };
+let currentDate = new Date();
+let loaded = false;
+
+function defaultGoals(){
+  return { waterMl: 2000, sleepHours: 8, studyDays: 5, workoutDays: 4 };
+}
+
+function fmtDate(d){
+  const y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,'0'), day=String(d.getDate()).padStart(2,'0');
+  return `${y}-${m}-${day}`;
+}
+function todayStr(){ return fmtDate(new Date()); }
+function currentKey(){ return fmtDate(currentDate); }
+
+function emptyDay(){
+  return { water:0, sleep:'', meals:[], workoutType:'', exercises:[], medTaken:false, studyDone:'', studyPending:'',
+           devVerse:'', devReading:'', weight:'', waist:'', hip:'', arm:'', thigh:'' };
+}
+function getDay(key){
+  if(!state.dayLogs[key]) state.dayLogs[key] = emptyDay();
+  else state.dayLogs[key] = Object.assign(emptyDay(), state.dayLogs[key]);
+  return state.dayLogs[key];
+}
+
+/* Armazenamento: usa o localStorage do navegador, então os dados ficam
+   salvos no próprio aparelho, sem servidor e sem conta. */
+const STORAGE_KEY = 'ritmo-state';
+const store = {
+  get(){ try{ return localStorage.getItem(STORAGE_KEY); }catch(e){ return null; } },
+  set(value){ localStorage.setItem(STORAGE_KEY, value); return true; }
+};
+
+async function loadState(){
+  try{
+    const raw = store.get();
+    if(raw){
+      const parsed = JSON.parse(raw);
+      state = {
+        expenses: parsed.expenses||[],
+        appointments: parsed.appointments||[],
+        dayLogs: parsed.dayLogs||{},
+        goals: Object.assign(defaultGoals(), parsed.goals||{})
+      };
+    } else {
+      state.goals = defaultGoals();
+    }
+  }catch(e){ state.goals = defaultGoals(); }
+  loaded = true;
+}
+let saveTimer=null;
+let saveRetries=0;
+async function persist(){
+  try{
+    store.set(JSON.stringify(state));
+    saveRetries = 0;
+  }catch(e){
+    console.error('Erro ao salvar', e);
+    if(saveRetries < 2){
+      saveRetries++;
+      setTimeout(persist, 800);
+    } else {
+      saveRetries = 0;
+      showToast('Não consegui salvar. Verifique o espaço do navegador.');
+    }
+  }
+}
+function saveDebounced(){
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(persist, 500);
+}
+
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 1600);
+}
+
+function switchTab(name){
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  document.querySelectorAll('nav.tabbar button').forEach(b=>b.classList.toggle('active', b.dataset.tab===name));
+  if(name==='gastos') renderGastos();
+  if(name==='metas') renderMetas();
+  if(name==='corpo') renderCorpo();
+  if(name==='mais'){
+    const activeSub = document.querySelector('.subnav button.active').dataset.sub;
+    switchSub(activeSub);
+  }
+}
+
+function switchSub(name){
+  document.querySelectorAll('.subpanel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('sub-'+name).classList.add('active');
+  document.querySelectorAll('.subnav button').forEach(b=>b.classList.toggle('active', b.dataset.sub===name));
+  if(name==='remedio') renderRemedio();
+  if(name==='estudos') renderEstudoHistorico();
+  if(name==='agenda') renderAgenda();
+}
+
+function shiftDay(delta){
+  currentDate.setDate(currentDate.getDate()+delta);
+  renderAll();
+}
+
+function renderHeader(){
+  const label = document.getElementById('dateLabel');
+  const isToday = fmtDate(currentDate) === todayStr();
+  const opts = { weekday:'long', day:'2-digit', month:'long' };
+  const str = currentDate.toLocaleDateString('pt-BR', opts);
+  label.innerHTML = (isToday ? 'Hoje' : str) + (isToday ? `<small>${str}</small>` : '<small>toque nas setas para navegar</small>');
+}
+
+function renderRitualStrip(){
+  const day = getDay(currentKey());
+  const items = [
+    {done: day.water>0, ic:'💧', go:"goToSection('hoje','sec-water')"},
+    {done: day.meals.length>0, ic:'🍽', go:"goToSection('hoje','sec-meals')"},
+    {done: !!day.workoutType, ic:'🏋', go:"goToSection('hoje','sec-workout')"},
+    {done: !!day.sleep, ic:'🌙', go:"goToSection('hoje','sec-sleep')"},
+    {done: !!(day.studyDone||day.studyPending), ic:'📚', go:"goToSection('mais','sec-estudos','estudos')"},
+    {done: !!(day.devVerse||day.devReading), ic:'📖', go:"goToSection('hoje','sec-devotional')"},
+    {done: day.medTaken, ic:'✚', go:"goToSection('hoje','sec-medication')"},
+  ];
+  const strip = document.getElementById('ritualStrip');
+  strip.innerHTML = items.map(i=>`<div class="ritual-dot ${i.done?'done':''}" onclick="${i.go}">${i.ic}</div>`).join('');
+}
+
+function goToSection(tab, anchorId, sub){
+  switchTab(tab);
+  if(sub) switchSub(sub);
+  setTimeout(()=>{
+    const el = document.getElementById(anchorId);
+    if(el && typeof el.scrollIntoView === 'function') el.scrollIntoView({behavior:'smooth', block:'start'});
+  }, 30);
+}
+
+/* ---- HOJE / dia atual ---- */
+function renderHoje(){
+  const day = getDay(currentKey());
+
+  const pct = Math.min(100, Math.round((day.water/state.goals.waterMl)*100));
+  document.getElementById('waterLabel').textContent = `${day.water} / ${state.goals.waterMl} ml`;
+  document.getElementById('waterPct').textContent = pct+'%';
+  document.getElementById('waterRing').style.setProperty('--pct', pct);
+  document.getElementById('waterRingText').textContent = pct+'%';
+
+  document.getElementById('sleepInput').value = day.sleep;
+
+  const ml = document.getElementById('mealsList');
+  ml.innerHTML = day.meals.length ? day.meals.map((m,idx)=>`
+    <div class="list-item">
+      <div><div class="li-main">${m.time||'--:--'}</div><div class="li-sub">${escapeHtml(m.desc)}</div></div>
+      <button class="del-btn" onclick="removeMeal(${idx})">✕</button>
+    </div>`).join('') : '<div class="empty">Nenhuma refeição registrada</div>';
+
+  document.getElementById('workoutType').value = day.workoutType;
+  const el = document.getElementById('exerciseList');
+  el.innerHTML = day.exercises.map((ex,idx)=>`
+    <div class="workout-ex"><input type="text" value="${escapeAttr(ex)}" onchange="editExercise(${idx}, this.value)">
+    <button onclick="removeExercise(${idx})">✕</button></div>`).join('');
+
+  const medLabel = document.getElementById('medTodayLabel');
+  const medIcon = document.getElementById('medTodayIcon');
+  medLabel.textContent = day.medTaken ? 'Remédio tomado ✓' : 'Ainda não tomei';
+  medIcon.textContent = day.medTaken ? '●' : '◯';
+  medIcon.style.color = day.medTaken ? '#6E9C81' : '#8A928E';
+
+  document.getElementById('studyDone').value = day.studyDone;
+  document.getElementById('studyPending').value = day.studyPending;
+
+  document.getElementById('devVerse').value = day.devVerse;
+  document.getElementById('devReading').value = day.devReading;
+}
+
+function addWater(delta){
+  const day = getDay(currentKey());
+  day.water = Math.max(0, day.water + delta);
+  saveDebounced(); renderHoje(); renderRitualStrip();
+}
+function saveSleep(v){
+  const day = getDay(currentKey());
+  day.sleep = v;
+  saveDebounced(); renderRitualStrip();
+}
+function addMeal(){
+  const time = document.getElementById('mealTime').value;
+  const desc = document.getElementById('mealDesc').value.trim();
+  if(!desc){ showToast('Descreva a refeição'); return; }
+  const day = getDay(currentKey());
+  day.meals.push({time, desc});
+  day.meals.sort((a,b)=> (a.time||'').localeCompare(b.time||''));
+  document.getElementById('mealDesc').value=''; document.getElementById('mealTime').value='';
+  saveDebounced(); renderHoje(); renderRitualStrip();
+}
+function removeMeal(idx){
+  const day = getDay(currentKey());
+  day.meals.splice(idx,1);
+  saveDebounced(); renderHoje(); renderRitualStrip();
+}
+function saveWorkoutType(v){
+  const day = getDay(currentKey());
+  day.workoutType = v;
+  saveDebounced(); renderRitualStrip();
+}
+function addExercise(){
+  const input = document.getElementById('exerciseInput');
+  const v = input.value.trim();
+  if(!v) return;
+  const day = getDay(currentKey());
+  day.exercises.push(v);
+  input.value='';
+  saveDebounced(); renderHoje();
+}
+function editExercise(idx, val){
+  const day = getDay(currentKey());
+  day.exercises[idx] = val;
+  saveDebounced();
+}
+function removeExercise(idx){
+  const day = getDay(currentKey());
+  day.exercises.splice(idx,1);
+  saveDebounced(); renderHoje();
+}
+function toggleMedToday(){
+  const day = getDay(currentKey());
+  day.medTaken = !day.medTaken;
+  saveDebounced(); renderHoje(); renderRitualStrip();
+}
+function saveStudy(){
+  const day = getDay(currentKey());
+  day.studyDone = document.getElementById('studyDone').value;
+  day.studyPending = document.getElementById('studyPending').value;
+  saveDebounced(); renderRitualStrip();
+}
+function saveDevotional(){
+  const day = getDay(currentKey());
+  day.devVerse = document.getElementById('devVerse').value;
+  day.devReading = document.getElementById('devReading').value;
+  saveDebounced(); renderRitualStrip();
+}
+function saveBody(){
+  const day = getDay(currentKey());
+  day.weight = document.getElementById('bodyWeight').value;
+  day.waist = document.getElementById('bodyWaist').value;
+  day.hip = document.getElementById('bodyHip').value;
+  day.arm = document.getElementById('bodyArm').value;
+  day.thigh = document.getElementById('bodyThigh').value;
+  saveDebounced(); renderCorpo();
+}
+
+/* ---- GASTOS ---- */
+function addExpense(){
+  const value = parseFloat(document.getElementById('expValue').value);
+  const category = document.getElementById('expCategory').value;
+  const desc = document.getElementById('expDesc').value.trim();
+  if(!value || value<=0){ showToast('Informe um valor válido'); return; }
+  state.expenses.push({ id: Date.now(), date: currentKey(), category, desc, value });
+  document.getElementById('expValue').value=''; document.getElementById('expDesc').value='';
+  saveDebounced(); renderGastos(); showToast('Gasto registrado');
+}
+function removeExpense(id){
+  state.expenses = state.expenses.filter(e=>e.id!==id);
+  saveDebounced(); renderGastos();
+}
+function renderGastos(){
+  const key = currentKey();
+  const dayExpenses = state.expenses.filter(e=>e.date===key);
+  const dayCard = document.getElementById('expDayCard');
+  dayCard.innerHTML = dayExpenses.length ? dayExpenses.map(e=>`
+    <div class="list-item">
+      <div><div class="li-main">${escapeHtml(e.desc||e.category)}</div><div class="li-sub">${e.category}</div></div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div class="li-value expense">R$ ${e.value.toFixed(2).replace('.',',')}</div>
+        <button class="del-btn" onclick="removeExpense(${e.id})">✕</button>
+      </div>
+    </div>`).join('') : '<div class="empty">Nenhum gasto neste dia</div>';
+
+  const monthKey = key.slice(0,7);
+  const monthExpenses = state.expenses.filter(e=>e.date.startsWith(monthKey));
+  const total = monthExpenses.reduce((s,e)=>s+e.value,0);
+  document.getElementById('monthTotalLabel').textContent = 'R$ '+total.toFixed(2).replace('.',',');
+  const d = new Date(monthKey+'-02');
+  document.getElementById('monthLabel').textContent = d.toLocaleDateString('pt-BR',{month:'long', year:'numeric'});
+
+  const byCat = {};
+  monthExpenses.forEach(e=>{ byCat[e.category] = (byCat[e.category]||0) + e.value; });
+  const cats = Object.entries(byCat).sort((a,b)=>b[1]-a[1]);
+  const max = cats.length ? cats[0][1] : 1;
+  document.getElementById('monthByCategory').innerHTML = cats.length ? cats.map(([cat,val])=>`
+    <div class="bar-row">
+      <div class="bar-label">${cat}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${Math.max(4,(val/max)*100)}%"></div></div>
+      <div class="bar-value">R$ ${val.toFixed(0)}</div>
+    </div>`).join('') : '<div class="empty">Sem gastos este mês</div>';
+}
+
+/* ---- METAS ---- */
+function saveGoals(){
+  state.goals.waterMl = parseInt(document.getElementById('goalWater').value) || defaultGoals().waterMl;
+  state.goals.sleepHours = parseFloat(document.getElementById('goalSleep').value) || defaultGoals().sleepHours;
+  state.goals.studyDays = parseInt(document.getElementById('goalStudy').value) || defaultGoals().studyDays;
+  state.goals.workoutDays = parseInt(document.getElementById('goalWorkout').value) || defaultGoals().workoutDays;
+  saveDebounced(); renderMetas(); renderHoje();
+}
+function meetsGoal(day, habit){
+  const g = state.goals;
+  switch(habit){
+    case 'water': return day.water >= g.waterMl;
+    case 'sleep': return parseFloat(day.sleep||0) >= g.sleepHours;
+    case 'study': return !!(day.studyDone && day.studyDone.trim());
+    case 'workout': return !!(day.workoutType && day.workoutType.trim() && day.workoutType.trim().toLowerCase() !== 'descanso');
+  }
+}
+function calcStreak(habit){
+  let streak=0;
+  let d = new Date();
+  while(true){
+    const key = fmtDate(d);
+    const day = state.dayLogs[key];
+    if(day && meetsGoal(day, habit)){ streak++; d.setDate(d.getDate()-1); } else break;
+  }
+  return streak;
+}
+function last7Hits(habit){
+  const hits=[];
+  for(let i=6;i>=0;i--){
+    const d = new Date(); d.setDate(d.getDate()-i);
+    const key = fmtDate(d);
+    const day = state.dayLogs[key];
+    hits.push(!!(day && meetsGoal(day, habit)));
+  }
+  return hits;
+}
+function renderWeekDots(elId, hits){
+  document.getElementById(elId).innerHTML = hits.map(h=>`<span class="${h?'hit':''}"></span>`).join('');
+}
+function renderMetas(){
+  const g = state.goals;
+  document.getElementById('goalWater').value = g.waterMl;
+  document.getElementById('goalSleep').value = g.sleepHours;
+  document.getElementById('goalStudy').value = g.studyDays;
+  document.getElementById('goalWorkout').value = g.workoutDays;
+
+  document.getElementById('streakWater').textContent = `🔥 ${calcStreak('water')} dias`;
+  document.getElementById('streakSleep').textContent = `🔥 ${calcStreak('sleep')} dias`;
+  document.getElementById('streakStudy').textContent = `🔥 ${calcStreak('study')} dias`;
+  document.getElementById('streakWorkout').textContent = `🔥 ${calcStreak('workout')} dias`;
+
+  const wWater = last7Hits('water'), wSleep = last7Hits('sleep'), wStudy = last7Hits('study'), wWorkout = last7Hits('workout');
+  renderWeekDots('weekWater', wWater);
+  renderWeekDots('weekSleep', wSleep);
+  renderWeekDots('weekStudy', wStudy);
+  renderWeekDots('weekWorkout', wWorkout);
+
+  document.getElementById('progWater').textContent = `${wWater.filter(Boolean).length}/7 dias na meta esta semana`;
+  document.getElementById('progSleep').textContent = `${wSleep.filter(Boolean).length}/7 noites na meta esta semana`;
+  document.getElementById('progStudy').textContent = `${wStudy.filter(Boolean).length}/${g.studyDays} dias — meta semanal`;
+  document.getElementById('progWorkout').textContent = `${wWorkout.filter(Boolean).length}/${g.workoutDays} dias — meta semanal`;
+}
+
+/* ---- CORPO ---- */
+function renderCorpo(){
+  const day = getDay(currentKey());
+  document.getElementById('bodyWeight').value = day.weight;
+  document.getElementById('bodyWaist').value = day.waist;
+  document.getElementById('bodyHip').value = day.hip;
+  document.getElementById('bodyArm').value = day.arm;
+  document.getElementById('bodyThigh').value = day.thigh;
+
+  const entries = Object.entries(state.dayLogs)
+    .filter(([k,v])=> v.weight!=='' && v.weight!=null)
+    .sort((a,b)=> a[0].localeCompare(b[0]));
+
+  if(entries.length >= 2){
+    const first = parseFloat(entries[0][1].weight);
+    const lastE = parseFloat(entries[entries.length-1][1].weight);
+    const delta = (lastE - first).toFixed(1);
+    document.getElementById('bodyDelta').textContent = `${delta>0?'+':''}${delta} kg desde ${new Date(entries[0][0]+'T00:00:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'short'})}`;
+  } else {
+    document.getElementById('bodyDelta').textContent = 'Sem dados suficientes ainda';
+  }
+
+  const recent = entries.slice(-10).reverse();
+  document.getElementById('bodyHistory').innerHTML = recent.length ? recent.map(([k,v])=>{
+    const d = new Date(k+'T00:00:00');
+    const label = d.toLocaleDateString('pt-BR',{day:'2-digit',month:'short'});
+    return `<div class="list-item">
+      <div><div class="li-main">${label}</div><div class="li-sub">${v.waist?('cintura '+v.waist+'cm '):''}${v.hip?('quadril '+v.hip+'cm'):''}</div></div>
+      <div class="li-value">${v.weight} kg</div>
+    </div>`;
+  }).join('') : '<div class="empty">Nenhum registro ainda</div>';
+}
+
+/* ---- REMEDIO ---- */
+function renderRemedio(){
+  const key = currentKey();
+  const [y,m] = key.split('-').map(Number);
+  const monthLabel = new Date(y, m-1, 2).toLocaleDateString('pt-BR',{month:'long', year:'numeric'});
+  document.getElementById('medMonthLabel').textContent = monthLabel;
+
+  const daysInMonth = new Date(y, m, 0).getDate();
+  const todayD = new Date();
+  let taken=0, elapsed=0;
+  let html='';
+  for(let d=1; d<=daysInMonth; d++){
+    const dateKey = `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const isFuture = new Date(y,m-1,d) > todayD && dateKey!==todayStr();
+    const dayData = state.dayLogs[dateKey];
+    const isTaken = dayData ? !!dayData.medTaken : false;
+    if(!isFuture){ elapsed++; if(isTaken) taken++; }
+    html += `<div class="med-day ${isTaken?'taken':''} ${isFuture?'future':''}" onclick="${isFuture?'':`toggleMedDate('${dateKey}')`}">${d}</div>`;
+  }
+  document.getElementById('medsGrid').innerHTML = html;
+  document.getElementById('medAdherence').textContent = elapsed ? Math.round((taken/elapsed)*100)+'%' : '0%';
+}
+function toggleMedDate(dateKey){
+  const day = getDay(dateKey);
+  day.medTaken = !day.medTaken;
+  saveDebounced(); renderRemedio();
+  if(dateKey===currentKey()){ renderHoje(); renderRitualStrip(); }
+}
+
+/* ---- ESTUDOS histórico ---- */
+function renderEstudoHistorico(){
+  const entries = Object.entries(state.dayLogs)
+    .filter(([k,v])=> v.studyDone || v.studyPending)
+    .sort((a,b)=> b[0].localeCompare(a[0]))
+    .slice(0,10);
+  const el = document.getElementById('studyHistory');
+  el.innerHTML = entries.length ? entries.map(([k,v])=>{
+    const d = new Date(k+'T00:00:00');
+    const label = d.toLocaleDateString('pt-BR',{day:'2-digit',month:'short'});
+    return `<div class="list-item" style="display:block;">
+      <div class="li-main">${label}</div>
+      ${v.studyDone?`<div class="li-sub">Estudado: ${escapeHtml(v.studyDone)}</div>`:''}
+      ${v.studyPending?`<div class="li-sub">Pendente: ${escapeHtml(v.studyPending)}</div>`:''}
+    </div>`;
+  }).join('') : '<div class="empty">Sem registros ainda</div>';
+}
+
+/* ---- AGENDA ---- */
+function addAppt(){
+  const title = document.getElementById('apptTitle').value.trim();
+  const date = document.getElementById('apptDate').value;
+  const time = document.getElementById('apptTime').value;
+  const notes = document.getElementById('apptNotes').value.trim();
+  if(!title || !date){ showToast('Preencha título e data'); return; }
+  state.appointments.push({ id: Date.now(), title, date, time, notes });
+  document.getElementById('apptTitle').value=''; document.getElementById('apptDate').value='';
+  document.getElementById('apptTime').value=''; document.getElementById('apptNotes').value='';
+  saveDebounced(); renderAgenda(); showToast('Lembrete salvo');
+}
+function removeAppt(id){
+  state.appointments = state.appointments.filter(a=>a.id!==id);
+  saveDebounced(); renderAgenda();
+}
+function renderAgenda(){
+  const today = todayStr();
+  const sorted = [...state.appointments].sort((a,b)=> (a.date+a.time).localeCompare(b.date+b.time));
+  const upcoming = sorted.filter(a=> a.date >= today);
+  const past = sorted.filter(a=> a.date < today).reverse();
+
+  const render = (list)=> list.length ? list.map(a=>{
+    const d = new Date(a.date+'T00:00:00');
+    const label = d.toLocaleDateString('pt-BR',{day:'2-digit',month:'short'});
+    return `<div class="list-item">
+      <div><div class="li-main">${escapeHtml(a.title)}</div><div class="li-sub">${label}${a.time?' · '+a.time:''}${a.notes?' · '+escapeHtml(a.notes):''}</div></div>
+      <button class="del-btn" onclick="removeAppt(${a.id})">✕</button>
+    </div>`;
+  }).join('') : null;
+
+  document.getElementById('apptUpcoming').innerHTML = render(upcoming) || '<div class="empty">Nenhum lembrete futuro</div>';
+  document.getElementById('apptPast').innerHTML = render(past) || '<div class="empty">Nenhum lembrete passado</div>';
+}
+
+/* ---- EXPORTAR ---- */
+function exportReport(period){
+  const end = new Date(currentDate);
+  let start;
+  let title;
+  if(period==='week'){
+    start = new Date(end); start.setDate(start.getDate()-6);
+    title = 'Relatório semanal';
+  } else {
+    start = new Date(end.getFullYear(), end.getMonth(), 1);
+    end.setDate(new Date(end.getFullYear(), end.getMonth()+1, 0).getDate());
+    title = 'Relatório mensal';
+  }
+  const startKey = fmtDate(start), endKey = fmtDate(end);
+  const rangeLabel = `${start.toLocaleDateString('pt-BR')} a ${end.toLocaleDateString('pt-BR')}`;
+
+  const daysInRange = [];
+  let d = new Date(start);
+  while(fmtDate(d) <= endKey){
+    daysInRange.push(fmtDate(d));
+    d.setDate(d.getDate()+1);
+  }
+  const logs = daysInRange.map(k=> state.dayLogs[k]).filter(Boolean);
+
+  const expensesInRange = state.expenses.filter(e=> e.date>=startKey && e.date<=endKey);
+  const totalExp = expensesInRange.reduce((s,e)=>s+e.value,0);
+  const byCat = {};
+  expensesInRange.forEach(e=>{ byCat[e.category]=(byCat[e.category]||0)+e.value; });
+
+  const waterDays = logs.filter(l=>l.water>0);
+  const avgWater = waterDays.length ? Math.round(waterDays.reduce((s,l)=>s+l.water,0)/waterDays.length) : 0;
+
+  const sleepDays = logs.filter(l=>l.sleep);
+  const avgSleep = sleepDays.length ? (sleepDays.reduce((s,l)=>s+parseFloat(l.sleep),0)/sleepDays.length).toFixed(1) : '—';
+
+  const workoutDays = logs.filter(l=>l.workoutType && l.workoutType.trim().toLowerCase()!=='descanso');
+  const studyDays = logs.filter(l=>l.studyDone && l.studyDone.trim());
+  const medDays = logs.filter(l=>l.medTaken).length;
+  const devDays = logs.filter(l=>l.devVerse || l.devReading).length;
+
+  const weightEntries = logs.filter(l=>l.weight!=='' && l.weight!=null);
+  let weightLine = 'Sem registros de peso no período';
+  if(weightEntries.length){
+    const firstW = parseFloat(weightEntries[0].weight);
+    const lastW = parseFloat(weightEntries[weightEntries.length-1].weight);
+    const delta = (lastW-firstW).toFixed(1);
+    weightLine = `${firstW}kg → ${lastW}kg (${delta>0?'+':''}${delta}kg)`;
+  }
+
+  const catRows = Object.entries(byCat).sort((a,b)=>b[1]-a[1])
+    .map(([c,v])=>`<div class="rep-row"><span>${c}</span><span>R$ ${v.toFixed(2).replace('.',',')}</span></div>`).join('');
+
+  document.getElementById('printArea').innerHTML = `
+    <h2 style="font-family:'Fraunces',serif;">${title}</h2>
+    <div class="muted" style="margin-bottom:16px;">${rangeLabel}</div>
+
+    <div class="rep-block">
+      <h4>Gastos</h4>
+      <div class="rep-row"><span>Total</span><span>R$ ${totalExp.toFixed(2).replace('.',',')}</span></div>
+      ${catRows || '<div class="rep-row"><span>Nenhum gasto registrado</span><span></span></div>'}
+    </div>
+
+    <div class="rep-block">
+      <h4>Rotina</h4>
+      <div class="rep-row"><span>Média de água</span><span>${avgWater} ml/dia</span></div>
+      <div class="rep-row"><span>Média de sono</span><span>${avgSleep} h</span></div>
+      <div class="rep-row"><span>Dias de treino</span><span>${workoutDays.length} de ${logs.length}</span></div>
+      <div class="rep-row"><span>Dias de estudo</span><span>${studyDays.length} de ${logs.length}</span></div>
+      <div class="rep-row"><span>Remédio tomado</span><span>${medDays} de ${logs.length} dias</span></div>
+      <div class="rep-row"><span>Devocional feito</span><span>${devDays} de ${logs.length} dias</span></div>
+    </div>
+
+    <div class="rep-block">
+      <h4>Corpo</h4>
+      <div class="rep-row"><span>Peso</span><span>${weightLine}</span></div>
+    </div>
+  `;
+  setTimeout(()=> window.print(), 150);
+}
+
+function escapeHtml(s){ return (s||'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function escapeAttr(s){ return escapeHtml(s); }
+
+function renderAll(){
+  renderHeader();
+  renderRitualStrip();
+  renderHoje();
+  const activeTab = document.querySelector('nav.tabbar button.active').dataset.tab;
+  if(activeTab==='gastos') renderGastos();
+  if(activeTab==='metas') renderMetas();
+  if(activeTab==='corpo') renderCorpo();
+  if(activeTab==='mais'){
+    const activeSub = document.querySelector('.subnav button.active').dataset.sub;
+    if(activeSub==='remedio') renderRemedio();
+    if(activeSub==='estudos') renderEstudoHistorico();
+    if(activeSub==='agenda') renderAgenda();
+  }
+}
+
+(async function init(){
+  document.getElementById('apptDate').min = todayStr();
+  await loadState();
+  renderAll();
+})();
+</script>
+</body>
+</html>
